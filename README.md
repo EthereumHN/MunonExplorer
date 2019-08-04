@@ -1,71 +1,44 @@
-# React Truffle Box
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-This box comes with everything you need to start using smart contracts from a react app. This is as barebones as it gets, so nothing stands in your way.
+## Available Scripts
 
-## Installation
+In the project directory, you can run:
 
-First ensure you are in a new and empty directory.
+### `npm start`
 
-1. Run the `unbox` command via `npx` and skip to step 3. This will install all necessary dependencies. A Create-React-App is generated in the `client` directory.
-   ```js
-   npx truffle unbox react
-   ```
+Runs the app in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-2. Alternatively, you can install Truffle globally and run the `unbox` command.
-    ```javascript
-    npm install -g truffle
-    truffle unbox react
-    ```
+The page will reload if you make edits.<br>
+You will also see any lint errors in the console.
 
-3. Run the development console.
-    ```javascript
-    truffle develop
-    ```
+### `npm test`
 
-4. Compile and migrate the smart contracts. Note inside the development console we don't preface commands with `truffle`.
-    ```javascript
-    compile
-    migrate
-    ```
+Launches the test runner in the interactive watch mode.<br>
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-5. In the `client` directory, we run the React app. Smart contract changes must be manually recompiled and migrated.
-    ```javascript
-    // in another terminal (i.e. not in the truffle develop prompt)
-    cd client
-    npm run start
-    ```
+### `npm run build`
 
-6. Truffle can run tests written in Solidity or JavaScript against your smart contracts. Note the command varies slightly if you're in or outside of the development console.
-    ```javascript
-    // inside the development console.
-    test
+Builds the app for production to the `build` folder.<br>
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-    // outside the development console..
-    truffle test
-    ```
+The build is minified and the filenames include the hashes.<br>
+Your app is ready to be deployed!
 
-7. Jest is included for testing React components. Compile your contracts before running Jest, or you may receive some file not found errors.
-    ```javascript
-    // ensure you are inside the client directory when running this
-    npm run test
-    ```
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-8. To build the application for production, use the build script. A production build will be in the `client/build` folder.
-    ```javascript
-    // ensure you are inside the client directory when running this
-    npm run build
-    ```
+### `npm run eject`
 
-## FAQ
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-* __How do I use this with the Ganache-CLI?__
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-    It's as easy as modifying the config file! [Check out our documentation on adding network configurations](http://truffleframework.com/docs/advanced/configuration#networks). Depending on the port you're using, you'll also need to update line 29 of `client/src/utils/getWeb3.js`.
+Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-* __Where is my production build?__
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-    The production build will be in the `client/build` folder after running `npm run build` in the `client` folder.
+## Learn More
 
-* __Where can I find more documentation?__
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-    This box is a marriage of [Truffle](http://truffleframework.com/) and a React setup created with [create-react-app](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md). Either one would be a great place to start!
+To learn React, check out the [React documentation](https://reactjs.org/).
