@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import HackathonMunonContract from "./contracts/HackathonMunon.json";
 import getWeb3 from "./utils/getWeb3";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+} from 'recharts';
 
 import "./App.css";
 
@@ -22,6 +25,8 @@ class App extends Component {
             tgu_average_rating: 0,
             tgu_top_participant_review_average: 0,
             tgu_participant_max_eth_collected: 0,
+
+            registrations_chart_data: [{}],
 
             gross_pot: 0,
             registration_count: 0,
@@ -60,6 +65,11 @@ class App extends Component {
 
     var that = this;
 
+    var registration_graph_data = [];
+    var sps_registration_graph_data = [];
+    var tgu_registration_graph_data = [];
+    var sps_registration_count = 0;
+    var tgu_registration_count = 0;
     contract.getPastEvents('Registration', {
       fromBlock: 0,
       toBlock: 'latest'
@@ -67,8 +77,23 @@ class App extends Component {
       var i = 0;
       for (i=0; i<events.length; i++) {
         var eventObj = events[i];
+
+        var chart_data_element = {};
+        if(events[i].returnValues.hackathon_id == 1)
+        {
+          sps_registration_count += 1;
+          chart_data_element = {blockNumber: parseInt(eventObj.blockNumber), registrations: i + 1, sps_registrations: sps_registration_count};
+        }
+        if(events[i].returnValues.hackathon_id == 2)
+        {
+          tgu_registration_count += 1;
+          chart_data_element = {blockNumber: parseInt(eventObj.blockNumber), registrations: i + 1, tgu_registrations: tgu_registration_count};
+        }
+        registration_graph_data.push(chart_data_element);
       }
       
+      that.setState({ registration_count: i });
+
       contract.getPastEvents('SponsorshipSubmited', {
         fromBlock: 0,
         toBlock: 'latest'
@@ -81,8 +106,8 @@ class App extends Component {
         }
         that.setState({ gross_pot: that.state.web3.utils.fromWei(""+(sponsorship_count + that.state.registration_count * 30000000000000000), 'ether') });
       });
-
-
+      
+      that.state.registrations_chart_data = registration_graph_data;
     });
 
     contract.getPastEvents('CashOut', {
@@ -265,7 +290,8 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>Hackathon Muñon results</h1>
+        <h1>Total results</h1>
+        <div>{ this.state.gross_pot } eth gross pot</div>
         <div>{ this.state.percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</div>
         <div>Participants collected { this.state.average_ether_collected } average ether</div>
         <div>{ this.state.average_rating } / 5 average participant review score</div>
@@ -285,6 +311,18 @@ class App extends Component {
         <div>{ this.state.tgu_average_rating } / 5 average participant review score</div>
         <div>{ this.state.tgu_top_participant_review_average } / 5 top participant review score</div>
         <div>The top participant collected { this.state.tgu_participant_max_eth_collected } ether</div>
+
+        <LineChart width={400} height={400} data={ this.state.registrations_chart_data }>
+          <XAxis type="number" dataKey="blockNumber" domain={[this.state.registrations_chart_data[0].blockNumber, this.state.registrations_chart_data[this.state.registrations_chart_data.length-1].blockNumber]} />
+          <YAxis/>
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="registrations" stroke="#8884d8" />
+          <Line connectNulls type="monotone" dataKey="sps_registrations" stroke="#82ca9d" />
+          <Line connectNulls type="monotone" dataKey="tgu_registrations" stroke="#8884d8" />
+        </LineChart>
+
+        <div>{ this.state.registration_count } participants registered</div>
       </div>
     );
   }
