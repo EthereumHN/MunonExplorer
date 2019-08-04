@@ -2,10 +2,13 @@ import React, { Component } from "react";
 import HackathonMunonContract from "./contracts/HackathonMunon.json";
 import getWeb3 from "./utils/getWeb3";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  LineChart, Line, XAxis, YAxis, Tooltip, Legend,
 } from 'recharts';
+import {
+  Heading, Text, Card, Icon
+} from 'rimble-ui';
 
-import "./App.css";
+//import "./App.css";
 
 class App extends Component {
   state = { percentange_participants_getting_more_that_entry: 0,
@@ -30,6 +33,8 @@ class App extends Component {
 
             gross_pot: 0,
             registration_count: 0,
+            event_count: 0,
+            rating_count: 0,
             web3: null, accounts: null, contract: null }
   componentDidMount = async () => {
     try {
@@ -41,7 +46,6 @@ class App extends Component {
 
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      console.log(networkId);
       const deployedNetwork = HackathonMunonContract.networks[networkId];
       const instance = new web3.eth.Contract(
         HackathonMunonContract.abi,
@@ -61,13 +65,11 @@ class App extends Component {
   };
 
   runExample = async () => {
-    const { accounts, contract } = this.state;
+    const { contract } = this.state;
 
     var that = this;
 
     var registration_graph_data = [];
-    var sps_registration_graph_data = [];
-    var tgu_registration_graph_data = [];
     var sps_registration_count = 0;
     var tgu_registration_count = 0;
     contract.getPastEvents('Registration', {
@@ -79,12 +81,12 @@ class App extends Component {
         var eventObj = events[i];
 
         var chart_data_element = {};
-        if(events[i].returnValues.hackathon_id == 1)
+        if(events[i].returnValues.hackathon_id === "1")
         {
           sps_registration_count += 1;
           chart_data_element = {blockNumber: parseInt(eventObj.blockNumber), registrations: i + 1, sps_registrations: sps_registration_count};
         }
-        if(events[i].returnValues.hackathon_id == 2)
+        if(events[i].returnValues.hackathon_id === "2")
         {
           tgu_registration_count += 1;
           chart_data_element = {blockNumber: parseInt(eventObj.blockNumber), registrations: i + 1, tgu_registrations: tgu_registration_count};
@@ -129,35 +131,35 @@ class App extends Component {
       var tgu_total_cashout = 0;
       for (i=0; i<events.length; i++) {
         var eventObj = events[i];
-        total_eth_collected += parseInt(events[i].returnValues.reward);
-        if(participant_max_eth_collected < events[i].returnValues.reward)
+        total_eth_collected += parseInt(eventObj.returnValues.reward);
+        if(participant_max_eth_collected < eventObj.returnValues.reward)
         {
-          participant_max_eth_collected = events[i].returnValues.reward;
+          participant_max_eth_collected = eventObj.returnValues.reward;
         }
-        if(events[i].returnValues.reward > entrance_fee)
+        if(eventObj.returnValues.reward > entrance_fee)
         {
           participants_collected_more_than_entry_count += 1;
-          if(events[i].returnValues.hackathon_id == 1)
+          if(eventObj.returnValues.hackathon_id === "1")
             sps_participants_collected_more_than_entry_count += 1;
-          if(events[i].returnValues.hackathon_id == 2)
+          if(eventObj.returnValues.hackathon_id === "2")
             tgu_participants_collected_more_than_entry_count += 1;
         }
-        if(events[i].returnValues.hackathon_id == 1)
+        if(eventObj.returnValues.hackathon_id === "1")
         {
           sps_total_cashout += 1;
-          sps_total_eth_collected += parseInt(events[i].returnValues.reward);
-          if(sps_participant_max_eth_collected < events[i].returnValues.reward)
+          sps_total_eth_collected += parseInt(eventObj.returnValues.reward);
+          if(sps_participant_max_eth_collected < eventObj.returnValues.reward)
           {
-            sps_participant_max_eth_collected = events[i].returnValues.reward;
+            sps_participant_max_eth_collected = eventObj.returnValues.reward;
           }
         }
-        if(events[i].returnValues.hackathon_id == 2)
+        if(eventObj.returnValues.hackathon_id === "2")
         {
           tgu_total_cashout += 1;
-          tgu_total_eth_collected += parseInt(events[i].returnValues.reward);
-          if(tgu_participant_max_eth_collected < events[i].returnValues.reward)
+          tgu_total_eth_collected += parseInt(eventObj.returnValues.reward);
+          if(tgu_participant_max_eth_collected < eventObj.returnValues.reward)
           {
-            tgu_participant_max_eth_collected = events[i].returnValues.reward;
+            tgu_participant_max_eth_collected = eventObj.returnValues.reward;
           }
         }
       }
@@ -206,18 +208,18 @@ class App extends Component {
           points_by_participant[events[i].returnValues.reviewed_addr][1] += 1;
         }
 
-        if(events[i].returnValues.hackathon_id == 1)
+        if(events[i].returnValues.hackathon_id === "1")
         {
           sps_raiting_sum += parseInt(events[i].returnValues.points);
           sps_rating_count += 1;
         }
-        if(events[i].returnValues.hackathon_id == 2)
+        if(events[i].returnValues.hackathon_id === "2")
         {
           tgu_raiting_sum += parseInt(events[i].returnValues.points);
           tgu_rating_count += 1;
         }
 
-        if(events[i].returnValues.hackathon_id == 1)
+        if(events[i].returnValues.hackathon_id === "1")
         {
           if(!sps_points_by_participant[events[i].returnValues.reviewed_addr])
           {
@@ -230,7 +232,7 @@ class App extends Component {
             sps_points_by_participant[events[i].returnValues.reviewed_addr][1] += 1;
           }
         }
-        if(events[i].returnValues.hackathon_id == 2)
+        if(events[i].returnValues.hackathon_id === "2")
         {
           if(!tgu_points_by_participant[events[i].returnValues.reviewed_addr])
           {
@@ -246,7 +248,8 @@ class App extends Component {
       }
       
       var top_review_score_average = 0;
-      for(var j=0; j<participant_addresses.length; j++)
+      var j;
+      for(j=0; j<participant_addresses.length; j++)
       {
         var participant_points = points_by_participant[participant_addresses[j]]
         var average = participant_points[0] / participant_points[1];
@@ -255,21 +258,21 @@ class App extends Component {
       }
 
       var sps_top_review_score_average = 0;
-      for(var j=0; j<sps_participant_addresses.length; j++)
+      for(j=0; j<sps_participant_addresses.length; j++)
       {
-        var participant_points = sps_points_by_participant[sps_participant_addresses[j]]
-        var average = participant_points[0] / participant_points[1];
-        if(sps_top_review_score_average <  average)
-          sps_top_review_score_average = average;
+        var sps_participant_points = sps_points_by_participant[sps_participant_addresses[j]]
+        var sps_average = sps_participant_points[0] / sps_participant_points[1];
+        if(sps_top_review_score_average <  sps_average)
+          sps_top_review_score_average = sps_average;
       }
 
       var tgu_top_review_score_average = 0;
-      for(var j=0; j<tgu_participant_addresses.length; j++)
+      for(j=0; j<tgu_participant_addresses.length; j++)
       {
-        var participant_points = tgu_points_by_participant[tgu_participant_addresses[j]]
-        var average = participant_points[0] / participant_points[1];
-        if(tgu_top_review_score_average <  average)
-          tgu_top_review_score_average = average;
+        var tgu_participant_points = tgu_points_by_participant[tgu_participant_addresses[j]]
+        var tgu_average = tgu_participant_points[0] / tgu_participant_points[1];
+        if(tgu_top_review_score_average <  tgu_average)
+          tgu_top_review_score_average = tgu_average;
       }
       
       var average_rating = raiting_sum / i;
@@ -281,6 +284,7 @@ class App extends Component {
       that.setState({ average_rating: Math.round(average_rating*100)/100 });
       that.setState({ sps_average_rating: Math.round(sps_average_rating*100)/100 });
       that.setState({ tgu_average_rating: Math.round(tgu_average_rating*100)/100 });
+      that.setState({ rating_count: i });
     });
   };
 
@@ -290,39 +294,62 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>Total results</h1>
-        <div>{ this.state.gross_pot } eth gross pot</div>
-        <div>{ this.state.percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</div>
-        <div>Participants collected { this.state.average_ether_collected } average ether</div>
-        <div>{ this.state.average_rating } / 5 average participant review score</div>
-        <div>{ this.state.top_participant_review_average } / 5 top participant review score</div>
-        <div>The top participant collected { this.state.participant_max_eth_collected } ether</div>
-        
-        <h1>SPS results</h1>
-        <div>{ this.state.sps_percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</div>
-        <div>Participants collected { this.state.sps_average_ether_collected } average ether</div>
-        <div>{ this.state.sps_average_rating } / 5 average participant review score</div>
-        <div>{ this.state.sps_top_participant_review_average } / 5 top participant review score</div>
-        <div>The top participant collected { this.state.sps_participant_max_eth_collected } ether</div>
-
-        <h1>TGU results</h1>
-        <div>{ this.state.tgu_percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</div>
-        <div>Participants collected { this.state.tgu_average_ether_collected } average ether</div>
-        <div>{ this.state.tgu_average_rating } / 5 average participant review score</div>
-        <div>{ this.state.tgu_top_participant_review_average } / 5 top participant review score</div>
-        <div>The top participant collected { this.state.tgu_participant_max_eth_collected } ether</div>
-
-        <LineChart width={400} height={400} data={ this.state.registrations_chart_data }>
-          <XAxis type="number" dataKey="blockNumber" domain={[this.state.registrations_chart_data[0].blockNumber, this.state.registrations_chart_data[this.state.registrations_chart_data.length-1].blockNumber]} />
-          <YAxis/>
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="registrations" stroke="#8884d8" />
-          <Line connectNulls type="monotone" dataKey="sps_registrations" stroke="#82ca9d" />
-          <Line connectNulls type="monotone" dataKey="tgu_registrations" stroke="#8884d8" />
-        </LineChart>
-
-        <div>{ this.state.registration_count } participants registered</div>
+        <Card>
+          <Heading.h1>El Hackathon Muñón results</Heading.h1>
+          <Text>In July 2019, <a href="http://munonhack.com">El Hackathón Muñón</a> powered <b>2 events</b> one in San Pedro Sula other in Tegucigalpa, Honduras. <b>{ this.state.rating_count } transparent feedback</b> was given by <b>{ this.state.registration_count } participants</b> and <b>a pot of { this.state.gross_pot } ether</b> was distributed.</Text>
+          <Card>
+            <Heading>Total results</Heading>
+            <Icon name="Mood" size="30"/>
+            <Text>{ this.state.percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</Text>
+            <Icon name="AccountBalanceWallet" size="30"/>
+            <Text>Participants collected { this.state.average_ether_collected } average ether</Text>
+            <Icon name="Assignment" size="30"/>
+            <Text>{ this.state.average_rating } / 5 average participant review score</Text>
+            <Icon name="Star" size="30"/>
+            <Text>{ this.state.top_participant_review_average } / 5 top participant review score</Text>
+            <Icon name="Whatshot" size="30"/>
+            <Text>The top participant collected { this.state.participant_max_eth_collected } ether</Text>
+          </Card>
+          
+          <Card>
+            <Heading>San Pedro Sula results</Heading>
+            <Icon name="Mood" size="30"/>
+            <Text>{ this.state.sps_percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</Text>
+            <Icon name="AccountBalanceWallet" size="30"/>
+            <Text>Participants collected { this.state.sps_average_ether_collected } average ether</Text>
+            <Icon name="Assignment" size="30"/>
+            <Text>{ this.state.sps_average_rating } / 5 average participant review score</Text>
+            <Icon name="Star" size="30"/>
+            <Text>{ this.state.sps_top_participant_review_average } / 5 top participant review score</Text>
+            <Icon name="Whatshot" size="30"/>
+            <Text>The top participant collected { this.state.sps_participant_max_eth_collected } ether</Text>
+          </Card>
+          <Card>
+            <Heading>Tegucigalpa results</Heading>
+            <Icon name="Mood" size="30"/>
+            <Text>{ this.state.tgu_percentange_participants_getting_more_that_entry }% participants cashed out more Ether than the entrance fee</Text>
+            <Icon name="AccountBalanceWallet" size="30"/>
+            <Text>Participants collected { this.state.tgu_average_ether_collected } average ether</Text>
+            <Icon name="Assignment" size="30"/>
+            <Text>{ this.state.tgu_average_rating } / 5 average participant review score</Text>
+            <Icon name="Star" size="30"/>
+            <Text>{ this.state.tgu_top_participant_review_average } / 5 top participant review score</Text>
+            <Icon name="Whatshot" size="30"/>
+            <Text>The top participant collected { this.state.tgu_participant_max_eth_collected } ether</Text>
+          </Card>
+          <Card>
+            <Heading>Registration timeline</Heading>
+            <LineChart width={400} height={400} data={ this.state.registrations_chart_data }>
+              <XAxis type="number" dataKey="blockNumber" domain={[this.state.registrations_chart_data[0].blockNumber, this.state.registrations_chart_data[this.state.registrations_chart_data.length-1].blockNumber]} />
+              <YAxis/>
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="registrations" stroke="#6E1EFF" />
+              <Line connectNulls type="monotone" dataKey="sps_registrations" stroke="#0EDA83" />
+              <Line connectNulls type="monotone" dataKey="tgu_registrations" stroke="#F1AF1B" />
+            </LineChart>
+          </Card>
+        </Card>
       </div>
     );
   }
