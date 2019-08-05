@@ -7,6 +7,7 @@ import {
 import {
   Heading, Text, Card, Icon
 } from 'rimble-ui';
+import NetworkIndicator from '@rimble/network-indicator';
 
 //import "./App.css";
 
@@ -35,6 +36,7 @@ class App extends Component {
             registration_count: 0,
             event_count: 0,
             rating_count: 0,
+            network_id: 0,
             web3: null, accounts: null, contract: null }
   componentDidMount = async () => {
     try {
@@ -45,8 +47,8 @@ class App extends Component {
       const accounts = await web3.eth.getAccounts();
 
       // Get the contract instance.
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = HackathonMunonContract.networks[networkId];
+      const network_id = await web3.eth.net.getId();
+      const deployedNetwork = HackathonMunonContract.networks[network_id];
       const instance = new web3.eth.Contract(
         HackathonMunonContract.abi,
         deployedNetwork && deployedNetwork.address,
@@ -54,7 +56,7 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance, network_id: network_id }, this.runExample);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -64,15 +66,15 @@ class App extends Component {
     }
   };
 
-  runExample = async () => {
+  updateData(_this)
+  {
     const { contract } = this.state;
-
-    var that = this;
+    var that = _this
 
     var registration_graph_data = [];
     var sps_registration_count = 0;
     var tgu_registration_count = 0;
-    contract.getPastEvents('Registration', {
+        contract.getPastEvents('Registration', {
       fromBlock: 0,
       toBlock: 'latest'
     }, function(error, events){
@@ -286,6 +288,11 @@ class App extends Component {
       that.setState({ tgu_average_rating: Math.round(tgu_average_rating*100)/100 });
       that.setState({ rating_count: i });
     });
+  }
+
+  runExample = async () => {
+    if(this.state.network_id === 1)
+      this.updateData(this);
   };
 
   render() {
@@ -296,6 +303,7 @@ class App extends Component {
       <div className="App">
         <Card>
           <Heading.h1>El Hackathon Muñón results</Heading.h1>
+          <NetworkIndicator currentNetwork={this.state.network_id} requiredNetwork={1} />
           <Text>In July 2019, <a href="http://munonhack.com">El Hackathón Muñón</a> powered <b>2 events</b> one in San Pedro Sula other in Tegucigalpa, Honduras. <b>{ this.state.rating_count } transparent feedback</b> was given by <b>{ this.state.registration_count } participants</b> and <b>a pot of { this.state.gross_pot } ether</b> was distributed.</Text>
           <Card>
             <Heading>Total results</Heading>
