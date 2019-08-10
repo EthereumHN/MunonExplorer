@@ -5,14 +5,17 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, Legend,
 } from 'recharts';
 import {
-  Heading, Text, Card, Icon
+  Heading, Text, Card, Icon, Box
 } from 'rimble-ui';
 import NetworkIndicator from '@rimble/network-indicator';
+import ConnectionBanner from '@rimble/connection-banner';
+import Header from "./components/Header.js";
 
 //import "./App.css";
 
 class App extends Component {
-  state = { percentange_participants_getting_more_that_entry: 0,
+  state = { event_count: 0,
+            percentange_participants_getting_more_that_entry: 0,
             average_ether_collected: 0,
             average_rating: 0,
             top_participant_review_average: 0,
@@ -169,17 +172,19 @@ class App extends Component {
       var average_ether_collected = total_eth_collected/i;
       var sps_average_ether_collected = sps_total_eth_collected / sps_total_cashout;
       var tgu_average_ether_collected = tgu_total_eth_collected / tgu_total_cashout;
-      that.setState({ average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(average_ether_collected*10000), 'ether'))/10000 });
-      that.setState({ sps_average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(sps_average_ether_collected*10000), 'ether'))/10000 });
-      that.setState({ tgu_average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(tgu_average_ether_collected*10000), 'ether'))/10000 });
-      that.setState({ participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(participant_max_eth_collected*10000), 'ether'))/10000 });
-      that.setState({ sps_participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(sps_participant_max_eth_collected*10000), 'ether'))/10000 });
-      that.setState({ tgu_participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(tgu_participant_max_eth_collected*10000), 'ether'))/10000 });
-      that.setState({ percentange_participants_getting_more_that_entry: Math.round(participants_collected_more_than_entry_count * 100 / i) });
-      that.setState({ sps_percentange_participants_getting_more_that_entry: Math.round(sps_participants_collected_more_than_entry_count * 100 / sps_total_cashout) });
-      that.setState({ tgu_percentange_participants_getting_more_that_entry: Math.round(tgu_participants_collected_more_than_entry_count * 100 / tgu_total_cashout) });
+      that.setState({
+        event_count: 2,
+        average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(average_ether_collected*10000), 'ether'))/10000,
+        sps_average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(sps_average_ether_collected*10000), 'ether'))/10000,
+        tgu_average_ether_collected: Math.round(that.state.web3.utils.fromWei(""+(tgu_average_ether_collected*10000), 'ether'))/10000,
+        participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(participant_max_eth_collected*10000), 'ether'))/10000,
+        sps_participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(sps_participant_max_eth_collected*10000), 'ether'))/10000,
+        tgu_participant_max_eth_collected: Math.round(that.state.web3.utils.fromWei(""+(tgu_participant_max_eth_collected*10000), 'ether'))/10000,
+        percentange_participants_getting_more_that_entry: Math.round(participants_collected_more_than_entry_count * 100 / i),
+        sps_percentange_participants_getting_more_that_entry: Math.round(sps_participants_collected_more_than_entry_count * 100 / sps_total_cashout),
+        tgu_percentange_participants_getting_more_that_entry: Math.round(tgu_participants_collected_more_than_entry_count * 100 / tgu_total_cashout)
+      });
     });
-
     contract.getPastEvents('RatingSubmited', {
       fromBlock: 0,
       toBlock: 'latest'
@@ -301,10 +306,15 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <Card>
-          <Heading.h1>El Hackathon Muñón results</Heading.h1>
+        <Header/>
+        <Box maxWidth={'640px'} mx={'auto'} p={3}>
           <NetworkIndicator currentNetwork={this.state.network_id} requiredNetwork={1} />
-          <Text>In July 2019, <a href="http://munonhack.com">El Hackathón Muñón</a> powered <b>2 events</b> one in San Pedro Sula other in Tegucigalpa, Honduras. <b>{ this.state.rating_count } transparent feedback</b> was given by <b>{ this.state.registration_count } participants</b> and <b>a pot of { this.state.gross_pot } ether</b> was distributed.</Text>
+          <ConnectionBanner
+            currentNetwork={this.state.network_id}
+            requiredNetwork={1}
+            onWeb3Fallback={window.ethereum == null}
+          />
+          <Text>In July 2019, <a href="http://munonhack.com">El Hackathón Muñón</a> powered <b>{this.state.event_count} events</b> one in San Pedro Sula other in Tegucigalpa, Honduras. <b>{ this.state.rating_count } transparent feedback</b> was given by <b>{ this.state.registration_count } participants</b> and <b>a pot of { this.state.gross_pot } ether</b> was distributed.</Text>
           <Card>
             <Heading>Total results</Heading>
             <Icon name="Mood" size="30"/>
@@ -357,7 +367,7 @@ class App extends Component {
               <Line connectNulls type="monotone" dataKey="tgu_registrations" stroke="#F1AF1B" />
             </LineChart>
           </Card>
-        </Card>
+        </Box>
       </div>
     );
   }
